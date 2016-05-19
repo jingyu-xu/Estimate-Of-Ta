@@ -70,7 +70,7 @@ model = mtype_cube_subsamp; air_id = -1;
 % model = model(18:end,:,:);
 % [s1_ss, s2_ss, s3_ss] = size(model);
 
-tumor_on = 0; tumor_depth = 8;  tumor_radius = 10; Tambient = 27; Tart = 37; 
+tumor_on = 0; tumor_depth = 10;  tumor_radius = 10; Tambient = 27; Tart = 37; 
 [T_3d_nom,tissue_3d_nom] = gen_breast_therm_model(model,s1_ss,s2_ss,s3_ss,tumor_on,tumor_depth,tumor_radius,Tambient,Tart,muscle_wall,skin_start);
 figure; contourf(T_3d_nom(:,:,floor(s3_ss/2)));
 colorbar;
@@ -93,7 +93,8 @@ T_diff1 = T_3d_abn1 - T_3d_nom;
 T_diff2 = T_3d_abn2 - T_3d_nom;
 T_diff3 = T_3d_abn3 - T_3d_nom;
 T_diff4 = T_3d_abn4 - T_3d_nom;
-plot(T_diff1(20:100,90,80),'k','LineWidth',1);
+% plot real Ta
+plot(T_diff1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1);
 load scat_fib_nom_22ghz_ceramic_center1.mat;
 load scat_fib_nom_22ghz_ceramic_right1.mat;
 load scat_fib_nom_22ghz_ceramic_left1.mat;
@@ -183,8 +184,8 @@ P = WF * theta;
 % Calculate TB_delta TB delta = Brightness Temperature -  TB0 with tumor
 % and without tumor TB_delta0
 TB_delta0 = TBn;
-TB_delta = TB_abn1 - TB_nominal;
-TB_delta1 = TB_abn1 - TB_nominal + TBn;
+TB_delta = TB_abn1 - TB_nominal; % without Noise
+TB_delta1 = TB_abn1 - TB_nominal + TBn; % with Noise
 TB_delta2 = TB_abn2 - TB_nominal + TBn;
 TB_delta3 = TB_abn3 - TB_nominal + TBn;
 TB_delta4 = TB_abn4 - TB_nominal + TBn;
@@ -194,15 +195,15 @@ dot11 = dot(TB_delta,theta(:,1));
 dot12 = dot(TB_delta,theta(:,2));
 dot13 = dot(TB_delta,theta(:,3));
 dot14 = dot(TB_delta,theta(:,4));
-dot15 = dot(TB_delta1,theta(:,5));
-dot_vec = [dot11; dot12; dot13; dot14; dot15];
-% dot_abn
+dot15 = dot(TB_delta,theta(:,5));
+dot_vec = [dot11; dot12; dot13; dot14; dot15]; % without Noise
+% dot_abn with noise
 dot1 = dot(TB_delta1,theta(:,1));
 dot2 = dot(TB_delta1,theta(:,2));
 dot3 = dot(TB_delta1,theta(:,3));
 dot4 = dot(TB_delta1,theta(:,4));
 dot5 = dot(TB_delta1,theta(:,5));
-dot_vec_1 = [dot1; dot2; dot3; dot4; dot5];
+dot_vec_1 = [dot1; dot2; dot3; dot4; dot5]; % with Noise
 
 % dot_nom
 dot1_nom = dot(TB_delta0,theta(:,1));
@@ -214,55 +215,80 @@ dot_vec_nom = [dot1_nom; dot2_nom; dot3_nom; dot4_nom; dot5_nom];
 
 lambda_inverse = 1./lambda;
 lambda_R_inverse = 1./lambda_R;
-Tahat_N = P * ((lambda_inverse).*dot_vec); % without tumor without regularize without noise
-Tahat_R_N = P * ((lambda_R_inverse).*dot_vec); % without tumor with regularized without noise
-Tahat_nom = P * ((lambda_inverse).*dot_vec_nom); % without tumor without regularize
-Tahat_R_nom = P * ((lambda_R_inverse).*dot_vec_nom); % without tumor with regularized
-Tahat_abn1 = P * ((lambda_inverse).*dot_vec_1); % with tumor without regularize
-Tahat_R_abn1 = P * ((lambda_R_inverse).*dot_vec_1); % with tumor with regularize
-Tahat_N_3d = convert_1d_to_3d(Tahat_N,s1_ss,s2_ss,s3_ss);
-Tahat_R_N_3d = convert_1d_to_3d(Tahat_R_N,s1_ss,s2_ss,s3_ss);
-Tahat_3d_nom = convert_1d_to_3d(Tahat_nom,s1_ss,s2_ss,s3_ss);
-Tahat_R_3d_nom = convert_1d_to_3d(Tahat_R_nom,s1_ss,s2_ss,s3_ss);
-Tahat_3d_abn1 = convert_1d_to_3d(Tahat_abn1,s1_ss,s2_ss,s3_ss);
-Tahat_R_3d_abn1 = convert_1d_to_3d(Tahat_R_abn1,s1_ss,s2_ss,s3_ss);
+% Tahat_N = P * ((lambda_inverse).*dot_vec); % without tumor without regularize without noise
+% Tahat_R_N = P * ((lambda_R_inverse).*dot_vec); % without tumor with regularized without noise
+% Tahat_nom = P * ((lambda_inverse).*dot_vec_nom); % without tumor without regularize
+% Tahat_R_nom = P * ((lambda_R_inverse).*dot_vec_nom); % without tumor with regularized
+Tahat_abn = P * ((lambda_inverse).*dot_vec); % with tumor without regularize without Noise
+Tahat_abn1 = P * ((lambda_inverse).*dot_vec_1); % with tumor without regularize with Noise
+Tahat_R_abn = P * ((lambda_R_inverse).*dot_vec); % with tumor with regularize without Noise
+Tahat_R_abn1 = P * ((lambda_R_inverse).*dot_vec_1); % with tumor with regularize with Noise
+% Tahat_N_3d = convert_1d_to_3d(Tahat_N,s1_ss,s2_ss,s3_ss);
+% Tahat_R_N_3d = convert_1d_to_3d(Tahat_R_N,s1_ss,s2_ss,s3_ss);
+% Tahat_3d_nom = convert_1d_to_3d(Tahat_nom,s1_ss,s2_ss,s3_ss);
+% Tahat_R_3d_nom = convert_1d_to_3d(Tahat_R_nom,s1_ss,s2_ss,s3_ss);
+Tahat_3d_abn = convert_1d_to_3d(Tahat_abn,s1_ss,s2_ss,s3_ss);% with tumor without regularize without Noise
+Tahat_3d_abn1 = convert_1d_to_3d(Tahat_abn1,s1_ss,s2_ss,s3_ss);% with tumor without regularize with Noise
+Tahat_R_3d_abn = convert_1d_to_3d(Tahat_R_abn,s1_ss,s2_ss,s3_ss);% with tumor with regularize without Noise
+Tahat_R_3d_abn1 = convert_1d_to_3d(Tahat_R_abn1,s1_ss,s2_ss,s3_ss);% with tumor with regularize with Noise
 
-% Plot unregularized Ta (with tumor
-% without noise)
-figure % Plot Ta without R with tumor without noise
-plot(Tahat_N_3d(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-figure % Plot Ta with R with tumor without noise
-plot(Tahat_R_N_3d(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-
-
-figure; % Plot Ta_R without Noise with tumor
-plot(Tahat_R_N_3d(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-figure; % Plot Ta_R with Noise with tumor
-plot(Tahat_R_3d_abn1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-
-
-% Plot the difference of Ta with and without tumor(without regularized with Noise)
-figure; % Plot Ta without R with Noise without Tumor
-plot(Tahat_3d_nom(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5); %Tahat without tumor without regularize
-xlabel('Depth (mm)');ylabel('Tahat');
-figure; % Plot Ta without R with Noise with Tumor
-plot(Tahat_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);  %Tahat with Tumor without regularize
-xlabel('Depth (mm)');ylabel('Tahat');
-
-
-
-figure; % Plot Ta_R with Noise without tumor
-plot(Tahat_R_3d_nom(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-figure; % Plot Ta_R with Noise with tumor
+% with tumor
+% plot compare unregularized without Noise Tahat with Ta_real
+figure
+hold on
+plot(T_diff1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
+plot(Tahat_3d_abn(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+legend('Ta','Tahat');
+title('unregularized without Noise Tahat');
+hold off
+% Plot compare unregularized with Noise Tahat with Ta_real
+figure
+hold on
+plot(T_diff1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
+plot(Tahat_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+legend('Ta','Tahat');
+title('unregularized with Noise Tahat');
+hold off
+% Plot compare regularized without Noise Tahat with Ta_real
+figure
+hold on
+plot(T_diff1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
+plot(Tahat_R_3d_abn(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+legend('Ta','Tahat');
+title('regularized without Noise Ta');
+hold off
+% Plot compare regularized with Noise Tahat with Ta_real
+figure
+hold on
+plot(T_diff1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
 plot(Tahat_R_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
-xlabel('Depth (mm)');ylabel('Tahat');
-
-
+xlabel('Depth (mm)');ylabel('Ta');
+legend('Ta','Tahat');
+title('regularized with Noise Ta');
+hold off
+% Plot unregularized without Noise Tahat
+figure
+plot(Tahat_3d_abn(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+title('unregularized without Noise Tahat');
+xlabel('Depth (mm)');ylabel('Ta');
+% Plot unregularized with Noise Tahat
+figure
+plot(Tahat_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+title('unregularized with Noise Tahat');
+% Plot regularized without Noise
+figure
+plot(Tahat_R_3d_abn(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+title('regularized without Noise Ta');
+% Plot regularized with Noise
+figure
+plot(Tahat_R_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
+xlabel('Depth (mm)');ylabel('Ta');
+title('regularized with Noise Ta');
 % Export useful variables to Excel
 % xlswrite('Tvec_nominal.xlsx',Tvec_nominal);
 % xlswrite('TB_nominal.xlsx',TB_nominal);
@@ -272,7 +298,7 @@ xlabel('Depth (mm)');ylabel('Tahat');
 % xlswrite('theta.xlsx',theta);
 % xlswrite('lambda.xlsx',lambda);
 % xlswrite('lambda_R.xlsx',lambda_R);
-xlswrite('P.xlsx',P(1:5));
+% xlswrite('P.xlsx',P(1:5));
 xlswrite('TB_delta1.xlsx',TB_delta1);
 xlswrite('TB_delta.xlsx',TB_delta);
 % xlswrite('Tahat_R.xlsx',Tahat_R);
