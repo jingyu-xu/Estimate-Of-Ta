@@ -230,36 +230,36 @@ Tahat_R_3d_abn1 = convert_1d_to_3d(Tahat_R_abn1,s1_ss,s2_ss,s3_ss);
 % Plot unregularized Ta (with tumor
 % without noise)
 figure % Plot Ta without R with tumor without noise
-plot(Tahat_N_3d(:,floor(s2_ss/3),floor(s3_ss/3)),'k','LineWidth',1.5);
+plot(Tahat_N_3d(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 figure % Plot Ta with R with tumor without noise
-plot(Tahat_R_N_3d(:,floor(s2_ss/3),floor(s3_ss/3)),'r','LineWidth',1.5);
+plot(Tahat_R_N_3d(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 
 
 figure; % Plot Ta_R without Noise with tumor
-plot(Tahat_R_N_3d(:,floor(s2_ss/3),floor(s3_ss/3)),'k','LineWidth',1.5);
+plot(Tahat_R_N_3d(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 figure; % Plot Ta_R with Noise with tumor
-plot(Tahat_R_3d_abn1(:,floor(s2_ss/3),floor(s3_ss/3)),'k','LineWidth',1.5);
+plot(Tahat_R_3d_abn1(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 
 
 % Plot the difference of Ta with and without tumor(without regularized with Noise)
 figure; % Plot Ta without R with Noise without Tumor
-plot(Tahat_3d_nom(:,floor(s2_ss/3),floor(s3_ss/3)),'k','LineWidth',1.5); %Tahat without tumor without regularize
+plot(Tahat_3d_nom(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5); %Tahat without tumor without regularize
 xlabel('Depth (mm)');ylabel('Tahat');
 figure; % Plot Ta without R with Noise with Tumor
-plot(Tahat_3d_abn1(:,floor(s2_ss/3),floor(s3_ss/3)),'r','LineWidth',1.5);  %Tahat with Tumor without regularize
+plot(Tahat_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);  %Tahat with Tumor without regularize
 xlabel('Depth (mm)');ylabel('Tahat');
 
 
 
 figure; % Plot Ta_R with Noise without tumor
-plot(Tahat_R_3d_nom(:,floor(s2_ss/3),floor(s3_ss/3)),'k','LineWidth',1.5);
+plot(Tahat_R_3d_nom(20:100,90,floor(s3_ss/2)),'k','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 figure; % Plot Ta_R with Noise with tumor
-plot(Tahat_R_3d_abn1(:,floor(s2_ss/3),floor(s3_ss/3)),'r','LineWidth',1.5);
+plot(Tahat_R_3d_abn1(20:100,90,floor(s3_ss/2)),'r','LineWidth',1.5);
 xlabel('Depth (mm)');ylabel('Tahat');
 
 
